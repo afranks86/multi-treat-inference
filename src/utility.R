@@ -11,7 +11,7 @@ generate_sparse_data  <- function(n, k, m, sparsity, seed=NULL) {
   sigma_t  <- 1
   t <- u %*% B + matrix(rnorm(k*n), ncol=k)
 
-  tau  <- ifelse(runif(k) < sparsity, rnorm(k, sd=2), 0)
+  tau  <- ifelse(runif(k) < sparsity, rnorm(k, sd=2), rep(0, k))
 
   Sigma_t  <- t(B) %*% B + diag(sigma_t^2, k)
   Sigma_inv  <- solve(t(B) %*% B + diag(sigma_t^2, k))
@@ -88,7 +88,7 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
   t <- u %*% B + matrix(rnorm(k*n, sd=sigma_t), ncol=k)
   y  <- t %*% tau + u %*% gamma + rnorm(n, sigma_y)
 
-  return(list(y=y, t=t, u=u, tau=tau, bias=bias,
+  return(list(y=y, t=t, u=u, tau=tau, obs_tau=obs_tau, bias=bias,
               sigma_y=sigma_y, sigma_t=sigma_t, sigma_total=sigma_total,
               gamma = gamma, Sigma_u_t = Sigma_u_t,
               r2t=r2t, r2y=r2y, B=B, seed=seed))
