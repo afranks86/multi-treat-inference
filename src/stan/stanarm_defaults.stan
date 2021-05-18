@@ -11,7 +11,6 @@ data {
 
   matrix[N, K] X;
   real y[N];
-  real<lower=0> sigma_beta;
 
   real<lower=0> alpha_scaler;
   real<lower=0> beta_scaler;
