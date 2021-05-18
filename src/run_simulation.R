@@ -2,7 +2,6 @@ library(tidyverse)
 library(mvtnorm)
 library(rstiefel)
 library(lubridate)
-library(CopSens)
 library(rstan)
 library(posterior)
 library(shinystan)
@@ -15,26 +14,13 @@ source("utility.R")
 
 argv <- R.utils::commandArgs(trailingOnly=TRUE, asValues=TRUE)
 
-sigma_y_prior <- as.numeric(get_attr_default(argv, "sigma_y_prior", 1))
-beta_prior <- as.numeric(get_attr_default(argv, "beta_prior", 1))
-
-
-print(sprintf("Using mscale: %s", mscale))
-print(sprintf("Using escale: %s", escale))
+model <- as.numeric(get_attr_default(argv, "m", 1))
+n <- as.numeric(get_attr_default(argv, "n", 100))
+k <- as.numeric(get_attr_default(argv, "k", 10))
+m <- as.numeric(get_attr_default(argv, "m", 2))
 
 seed  <- 104879
-data_list  <- generate_sparse_data(n=300, k=20, m=2, sparsity=0.4, seed=seed)
-
-sm <- stan_model("stan/naive_flat_priors.stan.stan")
-
-
-sm <- stan_model("stan/gamma_param.stan")
-
-sm3 <- stan_model("stan/regression_r2_param.stan")
-
-sm_horseshoe <- stan_model("stan/regression_horseshoe.stan")
-
-sm_horseshoe <- stan_model("stan/regression_horseshoe.stan")
+data_list  <- generate_data_null(n=n, k=k, m=m, seed=seed)
 
 y  <- as.numeric(data_list$y)
 X  <- apply(data_list$t, 2, function(x) scale(x, center=FALSE))
@@ -43,8 +29,26 @@ K  <- ncol(X)
 M  <-  data_list$m
 
 stan_data  <-  list(N=N, K=K, M=M, X=X, y=y)
-stan_results  <- sampling(sm_horseshoe, data=stan_data, chains=4,
+
+if(model == 1){
+    print("Running stanarm defaults model.")
+    sm <- stan_model("stan/stanarm_defaults.stan")
+} else if (model == 2) {
+    print("Running gamma param model.")
+    sm <- stan_model("stan/gamma_param.stan")
+} else if(model == 3) {
+    print("Running r2 param model.")
+    sm <- stan_model("stan/r2_param.stan")
+} else if (model == 4) {
+    print("Running horseshoe model")
+    sm <- stan_model("stan/horseshoe.stan")
+}
+
+
+
+stan_results  <- sampling(sm,
+                          data=stan_data, chains=4,
                           control=list(adapt_delta=0.9, max_treedepth=13))
 
 save(seed, data_list, stan_data, stan_results,
-     file=sprintf("../results/regress_n%i_k%i_m%i_horshoe_results_%s.RData", N, K, M, lubridate::today()))
+     file=sprintf("../results/model%i_n%i_k%i_m%i__results_%s.RData", model, N, K, M, lubridate::today()))

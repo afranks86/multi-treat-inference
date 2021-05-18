@@ -1,35 +1,34 @@
 library(lubridate)
 library(parallel)
-RSCRIPT_ALIAS <- "/opt/R/3.5.3/bin/Rscript"
+## RSCRIPT_ALIAS <- "/opt/R/3.5.3/bin/Rscript"
+RSCRIPT_ALIAS <- "/usr/bin/Rscript"
 
-iters <- 100
-sigma_y_prior  <- 1:4 ## prior on the outcome variance
-beta_prior  <- 1:5 ## prior on beta
+model <- 1:4
+n <- c(100, 1000)
+k <- c(10, 20)
+m <- c(2, 5)
 
-all_settings <- expand.grid(sigma_y_prior, beta_prior)
+all_settings <- expand.grid(model, k, n, m)
 
-option_names <- c('sigma_y_prior', 'beta_prior')
-option_types <- c('%i', '%i')
+option_names <- c('model', 'n', 'k', 'm')
+option_types <- c('%i', '%i', '%i', '%i')
 option_fstring <- paste('--', option_names, '=', option_types, collapse=' ', sep='')
 
-script_fstring <- paste(RSCRIPT_ALIAS, "run_simulation.R", option_fstring, sprintf("--iters=%i", iters))
+script_fstring <- paste(RSCRIPT_ALIAS, "run_simulation.R", option_fstring)
 
 logfile_options <- paste(option_names, option_types, collapse='_', sep='')
 logfile_fstring <- paste("logs/log_", logfile_options, "_%s.log", sep='')
 
 run_setting <- function(row){
     row <- unlist(row)
-    n <- row[1]
-    p <- row[2]
-    cc <- row[3]
-    ee <- row[4]
-    mm <- row[5]
-    aa <- row[6]
-    est <- as.logical(row[7])
+    model <- row[1]
+    n <- row[2]
+    k <- row[3]
+    m <- row[4]
 
-    call <- sprintf(script_fstring, n, p, cc, ab_dp, ee, mm, aa, est)
+    call <- sprintf(script_fstring, model, n, k, m)
     print(call)
-    logfile <- sprintf(logfile_fstring, n, p, cc, ab_dp, ee, mm, aa, est,
+    logfile <- sprintf(logfile_fstring, model, n, k, m,
                        gsub(" ", "", now(), fixed=TRUE))
     system(paste(call, ">", logfile, "2>&1"))
 }
