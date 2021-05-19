@@ -45,6 +45,11 @@ if(model == 1){
 } else if (model == 4) {
     print("Running horseshoe model")
     sm <- stan_model("stan/horseshoe.stan")
+} else if (model == 5) {
+  sm <- stan_model("stan/null_controls.stan")
+  stan_data$num_null  <- 1
+  stan_data$null_control_indices <- c(1)
+  stan_data$non_null_control_indices <- setdiff(1:K, stan_data$null_control_indices)
 }
 
 stan_results  <- sampling(sm,

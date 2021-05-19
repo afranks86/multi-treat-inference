@@ -3,7 +3,7 @@ library(parallel)
 ## RSCRIPT_ALIAS <- "/opt/R/3.5.3/bin/Rscript"
 RSCRIPT_ALIAS <- "/opt/conda/bin/Rscript"
 
-model <- 1:4
+model <- 1:5
 n <- c(100, 1000)
 k <- c(10, 20)
 m <- c(2, 5)
