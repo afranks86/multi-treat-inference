@@ -15,7 +15,7 @@ get_attr_default <- function(thelist, attrname, default) {
 
 argv <- R.utils::commandArgs(trailingOnly=TRUE, asValues=TRUE)
 
-model <- as.numeric(get_attr_default(argv, "m", 1))
+model <- as.numeric(get_attr_default(argv, "model", 1))
 n <- as.numeric(get_attr_default(argv, "n", 100))
 k <- as.numeric(get_attr_default(argv, "k", 10))
 m <- as.numeric(get_attr_default(argv, "m", 2))
@@ -28,6 +28,8 @@ X  <- apply(data_list$t, 2, function(x) scale(x, center=FALSE))
 N  <- length(y)
 K  <- ncol(X)
 M  <-  data_list$m
+
+print(sprintf("model=%i, n=%i, k=%i, m=%i", model, n, k, m))
 
 stan_data  <-  list(N=N, K=K, M=M, X=X, y=y)
 
@@ -50,4 +52,4 @@ stan_results  <- sampling(sm,
                           control=list(adapt_delta=0.9, max_treedepth=13))
 
 save(seed, data_list, stan_data, stan_results,
-     file=sprintf("../results/model%i_n%i_k%i_m%i__results_%s.RData", model, N, K, M, lubridate::today()))
+     file=sprintf("../results/model%i_n%i_k%i_m%i_results_%s.RData", model, N, K, M, lubridate::today()))

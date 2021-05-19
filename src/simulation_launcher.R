@@ -29,7 +29,7 @@ run_setting <- function(row){
     call <- sprintf(script_fstring, model, n, k, m)
     print(call)
     logfile <- sprintf(logfile_fstring, model, n, k, m,
-                       gsub(" ", "", now(), fixed=TRUE))
+                       gsub(" ", "", today(), fixed=TRUE))
     system(paste(call, ">", logfile, "2>&1"))
 }
 
