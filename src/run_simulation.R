@@ -15,7 +15,7 @@ get_attr_default <- function(thelist, attrname, default) {
 
 argv <- R.utils::commandArgs(trailingOnly=TRUE, asValues=TRUE)
 
-model <- as.numeric(get_attr_default(argv, "m", 1))
+model <- as.numeric(get_attr_default(argv, "model", 1))
 n <- as.numeric(get_attr_default(argv, "n", 100))
 k <- as.numeric(get_attr_default(argv, "k", 10))
 m <- as.numeric(get_attr_default(argv, "m", 2))
@@ -44,7 +44,10 @@ if(model == 1){
     print("Running horseshoe model")
     sm <- stan_model("stan/horseshoe.stan")
 } else if (model == 5) {
-    sm <- stan_model("stan/null_controls.stan")
+  sm <- stan_model("stan/null_controls.stan")
+  stan_data$num_null  <- 1
+  stan_data$null_control_indices <- c(1)
+  stan_data$non_null_control_indices <- setdiff(1:K, stan_data$null_control_indices)
 }
 
 stan_results  <- sampling(sm,
