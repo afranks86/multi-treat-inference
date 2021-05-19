@@ -3,14 +3,15 @@ library(mvtnorm)
 library(rstiefel)
 library(lubridate)
 library(rstan)
-library(posterior)
-library(shinystan)
-library(tidybayes)
 library(ggridges)
 library(colorspace)
 options(mc.cores = parallel::detectCores())
 library(R.utils)
 source("utility.R")
+
+get_attr_default <- function(thelist, attrname, default) {
+    if(!is.null(thelist[[attrname]])) thelist[[attrname]] else default
+}
 
 argv <- R.utils::commandArgs(trailingOnly=TRUE, asValues=TRUE)
 
@@ -45,8 +46,6 @@ if(model == 1){
 } else if (model == 5) {
     sm <- stan_model("stan/null_controls.stan")
 }
-
-
 
 stan_results  <- sampling(sm,
                           data=stan_data, chains=4,

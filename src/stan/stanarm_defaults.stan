@@ -44,9 +44,9 @@ model {
 
   sigma_total ~ exponential(1 / sdy);
   for(k in 1:K) {
-    beta[k] ~ normal(0, beta_scaler*2.5*sdy/sdx[k])
+    beta[k] ~ normal(0, beta_scaler*2.5*sdy/sdx[k]);
   }
-  alpha ~ normal(my, alpha_scaler*2.5*sdy)
+  alpha ~ normal(my, alpha_scaler*2.5*sdy);
 
   for(n in 1:N){
     X[n] ~ multi_normal_prec(rep_vector(0, K), sigma_X_inv);
