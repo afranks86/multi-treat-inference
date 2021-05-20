@@ -31,7 +31,7 @@ generate_sparse_data  <- function(n, k, m, sparsity, seed=NULL) {
 
   sigma_total  <- sqrt(var_u + sigma_y^2)
 
-  return(list(y=y, t=t, u=u, tau=tau, bias=bias,
+  return(list(n=n, k=k, m=m, y=y, t=t, u=u, tau=tau, bias=bias,
               sigma_y=sigma_y, sigma_t=sigma_t, sigma_total=sigma_total,
               gamma = gamma, Sigma_u_t = Sigma_u_t,
               r2t=r2t, r2y=r2y, B=B, seed=seed))
@@ -53,19 +53,19 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
 
   b1  <- normalize(tau - obs_tau)
   b2  <- normalize(rep(1, k))
-  d  <- normalize(c(1, 0))
 
   sigma_t  <- 1
-  Sigma_u_t  <- diag(c(0.2, 0.2))## diag(0.1, m)
+  Sigma_u_t  <- diag(0.2, m)
 
   diag_mat <- diag(sqrt((1-diag(Sigma_u_t)) / (diag(Sigma_u_t))))
-  B  <- t(cbind(b1, b2) %*% diag_mat)
+  B  <- t(cbind(b1, b2, matrix(rnorm(k*(m-2)), nrow=k)) %*% diag_mat)
   Sigma_inv  <- solve(t(B) %*% B + diag(sigma_t^2, k))
 
-
-  sigma_total  <- abs((obs_tau - tau) / (t(sqrt(r2)*chol(solve(Sigma_u_t)) %*% d) %*% B %*% Sigma_inv  %*% diag(k)))[1]
-  gamma  <- sigma_total * sqrt(r2)*chol(solve(Sigma_u_t)) %*% d
   bias  <- obs_tau - tau
+  gamma <- t(bias %*% MASS::ginv(B %*% Sigma_inv  %*% diag(k)))
+
+  sigma_u  <-  sqrt(t(gamma) %*% Sigma_u_t %*% gamma)
+  sigma_total  <- sqrt(sigma_u^2 / r2)
 
   computed_bias  <- as.numeric(t(gamma) %*% B %*% Sigma_inv  %*% diag(k))
   if(!isTRUE(all.equal(computed_bias, bias))) {
@@ -74,7 +74,6 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
       stop("Error in data generator")
   }
 
-  sigma_u  <-  sqrt(t(gamma) %*% Sigma_u_t %*% gamma)
   sigma_y  <- sqrt(sigma_total^2 - sigma_u^2)
 
   r2t  <- t(B) %*% B %*% Sigma_inv
@@ -88,7 +87,7 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
   t <- u %*% B + matrix(rnorm(k*n, sd=sigma_t), ncol=k)
   y  <- t %*% tau + u %*% gamma + rnorm(n, sigma_y)
 
-  return(list(y=y, t=t, u=u, tau=tau, obs_tau=obs_tau, bias=bias,
+  return(list(n=n, k=k, m=m, y=y, t=t, u=u, tau=tau, obs_tau=obs_tau, bias=bias,
               sigma_y=sigma_y, sigma_t=sigma_t, sigma_total=sigma_total,
               gamma = gamma, Sigma_u_t = Sigma_u_t,
               r2t=r2t, r2y=r2y, B=B, seed=seed))
