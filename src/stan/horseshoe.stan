@@ -11,7 +11,7 @@ data {
 
 }
 transformed data {
-  real k0 = 10;           // Expected number of large slopes
+  real k0 = 0.2*K;           // Expected fraction of large slopes is 0.2
   real slab_scale = 3;    // Scale for large slopes
   real slab_scale2 = square(slab_scale);
   real slab_df = 25;      // Effective degrees of freedom for large slopes
