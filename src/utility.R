@@ -58,7 +58,15 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
   Sigma_u_t  <- diag(0.2, m)
 
   diag_mat <- diag(sqrt((1-diag(Sigma_u_t)) / (diag(Sigma_u_t))))
-  B  <- t(cbind(b1, b2, matrix(rnorm(k*(m-2)), nrow=k)) %*% diag_mat)
+  if(m == 1) {
+    B  <- t(b1 %*% diag_mat)
+  } else if (m == 2) {
+    B  <- t(cbind(b1, b2) %*% diag_mat)
+  } else {
+    B  <- t(cbind(b1, b2, rstiefel::NullC(cbind(b1, b2))[, 1:(m-2)]) %*% diag_mat)
+  }
+
+  
   Sigma_inv  <- solve(t(B) %*% B + diag(sigma_t^2, k))
 
   bias  <- obs_tau - tau
