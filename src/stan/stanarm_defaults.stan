@@ -57,4 +57,5 @@ model {
 } generated quantities{
   real<lower=0> sigma_total = sqrt(sigma_y^2 + gamma' * B' * sigma_X_inv * B * gamma);
   real r2 = 1 - (sigma_y^2 / sigma_total^2);
+  vector[K] bias = sigma_X_inv * B * gamma;
 }
