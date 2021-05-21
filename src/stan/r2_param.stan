@@ -11,7 +11,6 @@ data {
 
   matrix[N, K] X;
   real y[N];
-  real<lower=0> sigma_beta;
 
 }
 parameters {

@@ -11,11 +11,10 @@ data {
 
   matrix[N, K] X;
   real y[N];
-  real<lower=0> sigma_beta;
-
+  
   int<lower=0, upper=M> num_null;
   int<lower=1, upper=K> null_control_indices[num_null];
-  int<lower=1, upper=K> non_null_control_indices[num_null];
+  int<lower=1, upper=K> non_null_control_indices[K - num_null];
 }
 parameters {
   vector[K - num_null] beta_free;

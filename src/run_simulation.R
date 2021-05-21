@@ -36,6 +36,8 @@ stan_data  <-  list(N=N, K=K, M=M, X=X, y=y)
 if(model == 1){
     print("Running stanarm defaults model.")
     sm <- stan_model("stan/stanarm_defaults.stan")
+    stan_data$alpha_scaler = 1
+    stan_data$beta_scaler = 1
 } else if (model == 2) {
     print("Running gamma param model.")
     sm <- stan_model("stan/gamma_param.stan")
@@ -48,12 +50,26 @@ if(model == 1){
 } else if (model == 5) {
   sm <- stan_model("stan/null_controls.stan")
   stan_data$num_null  <- 1
-  stan_data$null_control_indices <- c(1)
+  stan_data$null_control_indices <- as.array(c(1))
   stan_data$non_null_control_indices <- setdiff(1:K, stan_data$null_control_indices)
 }
+# 
+# // Finnish horseshoe params
+# vector[K] beta_tilde;
+# vector<lower=0>[K] lambda;
+# real<lower=0> c2_tilde;
+# real<lower=0> tau_tilde;
+# 
+# 
+# // other params
+# matrix[K, M] B; //
+#   real alpha;
+# real<lower=0> sigma_total;
+# real<lower=0> sigma_treat;
+# unit_vector[M] d;
+# real<lower=0, upper=1> r2;
 
-stan_results  <- sampling(sm,
-                          data=stan_data, chains=4,
+stan_results  <- sampling(sm, data=stan_data, chains=4,
                           control=list(adapt_delta=0.9, max_treedepth=13))
 
 save(seed, data_list, stan_data, stan_results,
