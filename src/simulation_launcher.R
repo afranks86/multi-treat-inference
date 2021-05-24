@@ -1,17 +1,17 @@
 library(lubridate)
 library(parallel)
-## RSCRIPT_ALIAS <- "/opt/R/3.5.3/bin/Rscript"
-RSCRIPT_ALIAS <- "/opt/conda/bin/Rscript"
+RSCRIPT_ALIAS <- "/opt/R/4.1.0/bin/Rscript"
+#RSCRIPT_ALIAS <- "/opt/conda/bin/Rscript"
 
 model <- 1:5
 n <- c(100, 1000)
-k <- c(10, 20)
-m <- c(2, 5)
+k <- c(5, 10, 20)
+m <- c(1, 2, 5)
 
-model <- 1:5
-n <- c(100)
-k <- c(10)
-m <- c(2)
+#model <- 1:5
+#n <- c(100)
+#k <- c(10)
+#m <- c(2)
 
 all_settings <- expand.grid(model, n, k, m)
 
@@ -22,7 +22,7 @@ option_fstring <- paste('--', option_names, '=', option_types, collapse=' ', sep
 script_fstring <- paste(RSCRIPT_ALIAS, "run_simulation.R", option_fstring)
 
 logfile_options <- paste(option_names, option_types, collapse='_', sep='')
-logfile_fstring <- paste("logs/log_", logfile_options, "_%s.log", sep='')
+logfile_fstring <- paste("../logs/log_", logfile_options, "_%s.log", sep='')
 
 run_setting <- function(row){
     row <- unlist(row)
@@ -46,5 +46,5 @@ retcodes <- mclapply(1:nrow(all_settings),
 
 print(retcodes)
 save(retcodes, all_settings,
-     file=paste("logs/experiment_exit_status_",
+     file=paste("../logs/experiment_exit_status_",
                 gsub(" ", "", now(), fixed=TRUE), ".log", sep=""))
