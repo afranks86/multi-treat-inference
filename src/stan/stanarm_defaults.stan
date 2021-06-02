@@ -32,6 +32,8 @@ parameters {
   real<lower=0> sigma_y;
   vector[M] gamma;
 
+} transformed parameters {
+  cov_matrix[K] sigma_X_inv = diag_matrix(rep_vector(1.0 / sigma_treat^2, K)) - 1.0 /sigma_treat^4 * B * inverse(diag_matrix(rep_vector(1, M)) + 1/sigma_treat^2 * B' * B) * B';
 }
 model {
 
@@ -47,7 +49,7 @@ model {
 
   for(n in 1:N){
     U[n] ~ normal(0, 1);
-    X[n] ~ multi_normal(B * U[n], diag_matrix(square(sigma_treat)));
+    X[n] ~ multi_normal(U[n] * B', diag_matrix(square(rep_vector(sigma_treat, K))));
     y[n] ~ normal(alpha + X[n] * beta + U[n] * gamma, sigma_y);
   }
 
