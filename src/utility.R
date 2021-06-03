@@ -93,7 +93,7 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
 
   u <- matrix(rnorm(n*m), ncol=m)
   t <- u %*% B + matrix(rnorm(k*n, sd=sigma_t), ncol=k)
-  y  <- t %*% tau + u %*% gamma + rnorm(n, sigma_y)
+  y  <- t %*% tau + u %*% gamma + rnorm(n, 0, sigma_y)
 
   return(list(n=n, k=k, m=m, y=y, t=t, u=u, tau=tau, obs_tau=obs_tau, bias=bias,
               sigma_y=sigma_y, sigma_t=sigma_t, sigma_total=sigma_total,
