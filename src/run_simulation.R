@@ -47,27 +47,14 @@ if(model == 1){
 } else if (model == 4) {
     print("Running horseshoe model")
     sm <- stan_model("stan/horseshoe.stan")
+    stan_data$frac_non_null <- 0.2
+    stan_data$slab_scale <- 3
 } else if (model == 5) {
   sm <- stan_model("stan/null_controls.stan")
   stan_data$num_null  <- 1
   stan_data$null_control_indices <- as.array(c(1))
   stan_data$non_null_control_indices <- setdiff(1:K, stan_data$null_control_indices)
 }
-# 
-# // Finnish horseshoe params
-# vector[K] beta_tilde;
-# vector<lower=0>[K] lambda;
-# real<lower=0> c2_tilde;
-# real<lower=0> tau_tilde;
-# 
-# 
-# // other params
-# matrix[K, M] B; //
-#   real alpha;
-# real<lower=0> sigma_total;
-# real<lower=0> sigma_treat;
-# unit_vector[M] d;
-# real<lower=0, upper=1> r2;
 
 stan_results  <- sampling(sm, data=stan_data, chains=4,
                           control=list(adapt_delta=0.9, max_treedepth=13))

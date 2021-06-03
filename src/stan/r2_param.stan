@@ -24,9 +24,9 @@ parameters {
 
 }
 transformed parameters {
-  cov_matrix[K] sigma_X_inv = diag_matrix(rep_vector(1.0 / sigma_treat^2, K)) - 1.0 /sigma_treat^4 * B * inverse(diag_matrix(rep_vector(1, M)) + 1/sigma_treat^2 * B' * B) * B';
+  cov_matrix[K] sigma_X_inv = diag_matrix(rep_vector(1.0 / sigma_treat^2, K)) - 1.0 /sigma_treat^4 * B * inverse_spd(diag_matrix(rep_vector(1, M)) + 1/sigma_treat^2 * B' * B) * B';
   cov_matrix[M] sigma_u_t = diag_matrix(rep_vector(1, M)) - B' * sigma_X_inv * B;
-  cholesky_factor_cov[M] sigma_u_t_root_inv = cholesky_decompose(inverse(sigma_u_t));
+  cholesky_factor_cov[M] sigma_u_t_root_inv = cholesky_decompose(inverse_spd(sigma_u_t));
   vector[M] gamma = sigma_total*sqrt(r2)*sigma_u_t_root_inv*d;
   vector[K] bias = sigma_X_inv * B * gamma;
 }

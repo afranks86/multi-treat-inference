@@ -6,14 +6,16 @@ data {
   int<lower=1> K; // Number of covariates
   int<lower=1> M; // Number of confounders
 
+  // regularizing parameters
+  real<lower=0, upper=1> frac_non_null;
+  real slab_scale;    // Scale for large slopes
+  
   matrix[N, K] X;
   real y[N];
-  real<lower=0, upper=1> frac_non_null;
-  real<lower=0> slab_scale;    // Scale for large slopes
+
 }
 transformed data {
   real k0 = frac_non_null*K;           // Expected fraction of large slopes is 0.2
-
   real slab_scale2 = square(slab_scale);
   real slab_df = 25;      // Effective degrees of freedom for large slopes
   real half_slab_df = 0.5 * slab_df;

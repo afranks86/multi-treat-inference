@@ -5,12 +5,7 @@ RSCRIPT_ALIAS <- "/opt/conda/bin/Rscript"
 
 model <- 1:5
 n <- c(100, 1000)
-k <- c(10, 20)
-m <- c(2, 5)
-
-model <- 1:5
-n <- c(100)
-k <- c(10)
+k <- c(5, 10, 20)
 m <- c(2)
 
 all_settings <- expand.grid(model, n, k, m)

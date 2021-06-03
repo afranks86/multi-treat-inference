@@ -6,20 +6,23 @@ library(tidybayes)
 library(ggridges)
 options(mc.cores = parallel::detectCores())
 
-sm <- stan_model("stan/regression2.stan")
+mice_data <- read_csv("../data/micedata.csv")
 
-y  <- micedata[, 1]
-X  <- micedata[, 2:ncol(micedata)]
-X  <- micedata[, 2:18]
+sm_horseshoe <- stan_model("stan/horseshoe.stan")
+
+y  <- mice_data %>% pull(y)
+X  <- mice_data %>% select(Igfbp2:Veph1) %>% mutate_all(function(x) scale(x, center=FALSE))
 
 N  <- length(y)
 K  <- ncol(X)
-M  <-  1
+M  <-  3
 
-stan_data  <-  list(N=N, K=K, M=M, X=X, y=y)
-stan_results  <- sampling(sm, data=stan_data, chains=4)
+stan_data  <-  list(N=N, K=K, M=M, X=as.matrix(X), y=y)
+stan_data$frac_nonzero <- 0.1
+stan_data$slab_scale <- 1
+stan_results  <- sampling(sm_horseshoe, data=stan_data, chains=4, control=list(adapt_delta=0.9, max_treedepth=13)))
 
-save(stan_results, file="../results/regress_results.RData")
+save(stan_results, file="../results/mice_horseshoe.RData")
 
 launch_shinystan(stan_results)
 
