@@ -54,7 +54,13 @@ model {
   }
 
 } generated quantities{
-  real<lower=0> sigma_total = sqrt(sigma_y^2 + gamma' * B' * sigma_X_inv * B * gamma);
+  vector[N] log_lik;
+
+  real<lower=0> sigma_total = sqrt(sigma_y^2 + gamma'*gamma - gamma' * B' * sigma_X_inv * B * gamma);
   real r2 = 1 - (sigma_y^2 / sigma_total^2);
   vector[K] bias = sigma_X_inv * B * gamma;
+
+  for(n in 1:N) {
+    log_lik[n] = multi_normal_lpdf(X[n] | U[n] * B', diag_matrix(square(rep_vector(sigma_treat, K)))) + normal_lpdf(y[n] | alpha + X[n] * beta + U[n] * gamma, sigma_y);
+  }
 }
