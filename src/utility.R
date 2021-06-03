@@ -27,7 +27,7 @@ generate_sparse_data  <- function(n, k, m, sparsity, seed=NULL) {
   sigma_y <- 1
   r2y  <- var_u / (var_u + sigma_y^2)
 
-  y  <- t %*% tau + u %*% gamma + rnorm(n, sigma_y)
+  y  <- t %*% tau + u %*% gamma + rnorm(n, 0, sigma_y)
 
   sigma_total  <- sqrt(var_u + sigma_y^2)
 
