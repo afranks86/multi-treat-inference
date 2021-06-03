@@ -8,11 +8,12 @@ data {
 
   matrix[N, K] X;
   real y[N];
-
+  real<lower=0, upper=1> frac_non_null;
+  real<lower=0> slab_scale;    // Scale for large slopes
 }
 transformed data {
-  real k0 = 0.2*K;           // Expected fraction of large slopes is 0.2
-  real slab_scale = 3;    // Scale for large slopes
+  real k0 = frac_non_null*K;           // Expected fraction of large slopes is 0.2
+
   real slab_scale2 = square(slab_scale);
   real slab_df = 25;      // Effective degrees of freedom for large slopes
   real half_slab_df = 0.5 * slab_df;
@@ -24,7 +25,6 @@ parameters {
   vector<lower=0>[K] lambda;
   real<lower=0> c2_tilde;
   real<lower=0> tau_tilde;
-
 
   // other params
   matrix[K, M] B; //
@@ -75,5 +75,10 @@ model {
     X[n] ~ multi_normal_prec(rep_vector(0, K), sigma_X_inv);
     y[n] ~ normal(alpha + X[n] * (beta + bias), sigma_total);
   }
+} generated quantities {
 
+  vector[N] log_lik;
+  for(n in 1:N) {
+    log_lik[n] = multi_normal_prec_lpdf(X[n] | rep_vector(0, K), sigma_X_inv) + normal_lpdf(y[n] | alpha + X[n] * (beta + bias), sigma_total);
+  }
 }

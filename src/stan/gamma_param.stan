@@ -37,5 +37,9 @@ model {
 
 }
 generated quantities{
+  vector[N] log_lik;
   real r2 = 1 - (sigma_y^2 / sigma_total^2);
+  for(n in 1:N) {
+    log_lik[n] = multi_normal_prec_lpdf(X[n] | rep_vector(0, K), sigma_X_inv) + normal_lpdf(y[n] | alpha + X[n] * (beta + bias), sigma_total);
+  }
 }

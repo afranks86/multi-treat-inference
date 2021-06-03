@@ -37,4 +37,11 @@ model {
     y[n] ~ normal(alpha + X[n] * (beta + bias), sigma_total);
   }
 
+} generated quantities {
+
+  vector[N] log_lik;
+  for(n in 1:N) {
+    log_lik[n] = multi_normal_prec_lpdf(X[n] | rep_vector(0, K), sigma_X_inv) + normal_lpdf(y[n] | alpha + X[n]*(beta+bias), sigma_total);
+  }
+
 }
