@@ -72,6 +72,8 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
   bias  <- obs_tau - tau
   gamma <- t(bias %*% MASS::ginv(B %*% Sigma_inv  %*% diag(k)))
 
+  Sigma_u_t  <- diag(m) - B %*% Sigma_inv %*% t(B)
+
   sigma_u  <-  sqrt(t(gamma) %*% Sigma_u_t %*% gamma)
   sigma_total  <- sqrt(sigma_u^2 / r2)
 
@@ -100,5 +102,33 @@ generate_data_null  <- function(n, k, m, null_treatments=TRUE, r2=0.5, seed=NULL
               gamma = gamma, Sigma_u_t = Sigma_u_t,
               r2t=r2t, r2y=r2y, B=B, seed=seed))
 
+
+}
+
+plot_gammas  <- function(res, filters, facet_cols = 5, facet_vars=c("model"), circle_radius=0, color_var=sym("RMSE")) {
+
+  circle_dat  <- res %>% ungroup %>% filters %>% select(model, ntreat, n, r) %>%  distinct() %>% mutate(zero=0)
+  as_tibble(res) %>% filters %>% select(M, gamma, r2, !!color_var, n, ntreat, model) %>% distinct() %>%
+    arrange(desc(!!color_var)) %>%
+    pivot_wider(names_from=M, values_from=gamma, names_prefix="g") %>%
+    ggplot() +
+    geom_point(aes(x=g1, y=g2, col=!!color_var), alpha=0.75, size=0.5) + theme_bw(base_size=16) +
+    scale_color_continuous_sequential(palette = "Viridis")  +
+    ylab("Gamma[2]") + xlab("Gamma[1]") + 
+    ggforce::geom_circle(data=circle_dat, aes(x0=zero, y0=zero, r=r)) +
+    facet_wrap(vars(!!!syms(facet_vars)), ncol=facet_cols, labeller = label_wrap_gen(multi_line=FALSE))
+
+}
+
+## R^2 Histogram
+plot_r2_histograms  <- function(res, filters = function(x) {x}, facet_cols = 5, facet_vars=c("model")) {
+
+
+  as_tibble(res) %>% filters %>% select(M, m, gamma, r2, RMSE, n, ntreat, model) %>% distinct() %>%
+    arrange(desc(RMSE)) %>%
+    pivot_wider(names_from=M, values_from=gamma, names_prefix="g") %>%
+    ggplot() + geom_histogram(aes(x=r2, col=RMSE), alpha=0.75) + theme_bw(base_size=16) +
+    facet_wrap(vars(!!!syms(facet_vars)), ncol=facet_cols, labeller = label_wrap_gen(multi_line=FALSE)) +
+    scale_color_continuous_sequential(palette = "Viridis") + ylab("Count")  + xlab("Partial Variance Explained by Confounders")
 
 }

@@ -5,10 +5,19 @@ RSCRIPT_ALIAS <- "/opt/conda/bin/Rscript"
 
 model <- 1:5
 n <- c(100, 1000)
+
 k <- c(5, 10, 20)
 m <- c(2)
 
+frac_non_null <- c(0.1, 0.2, 0.5, 0.8)
+
 all_settings <- expand.grid(model, n, k, m)
+
+
+all_settings$frac_non_null <- -1
+sparse_model_indices <- which(all_settings[, 1]==4)
+
+tmp <- all_settings[rep(sparse_model_indices, each=length(frac_non_null)), ]
 
 option_names <- c('model', 'n', 'k', 'm')
 option_types <- c('%i', '%i', '%i', '%i')

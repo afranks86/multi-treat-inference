@@ -28,9 +28,10 @@ M  <-  data_list$m
 
 stan_data  <-  list(N=N, K=K, M=M, X=X, y=y)
 stan_results  <- sampling(sm_horseshoe, data=stan_data, chains=4,
-                          adapt_delta=0.9, treedepth=13)
+                          control=list(adapt_delta=0.9, max_treedepth=13))
 
-save(seed, stan_data, stan_results, file=sprintf("../results/regress_5_factor_results_%s.RData", lubridate::today()))
+save(seed, stan_data, stan_results,
+     file=sprintf("../results/regress_2_horshoe_results_%s.RData", lubridate::today()))
 
 
 stan_results  <- sampling(sm3, data=stan_data, chains=4)
@@ -47,14 +48,24 @@ min_index  <- which.min(apply(samples$beta, 1, function(x) median(abs(x))))
 
 
 samples$r2[min_index]
-cor.test(data_list$tau, samples$beta[min_index, ])
+
+cor.test(coef(lm(data_list$y ~ data_list$t - 1)), colMeans(samples$beta))
+plot(coef(lm(data_list$y ~ data_list$t - 1)), colMeans(samples$beta))
+
+cor.test(data_list$tau, colMeans(samples$beta))
+plot(data_list$tau, colMeans(samples$beta))
+
+
+
+
 
 launch_shinystan(stan_results)
 
 stan_results %>% spread_draws(beta[K], r2) %>%
   mutate(K = as.factor(K)) %>%
-ggplot() + geom_point(aes(x=r2, y=beta, col=r2), size=0.1) +
-  facet_wrap(~K, scales="free")
+ggplot() + geom_density2d(aes(x=r2, y=beta)) +
+theme_bw() +
+facet_wrap(~K, scales="free")
 
 stan_results %>% spread_draws(beta[K], r2) %>%
   group_by(.draw) %>%
@@ -66,8 +77,22 @@ stan_results %>% spread_draws(beta[K], r2) %>%
 
 
 stan_results %>% spread_draws(beta[K], r2) %>%
-  mutate(K = as.factor(K)) %>%
-ggplot() + geom_histogram(aes(beta)) +
+mutate(K = as.factor(K)) %>%
+left_join(tibble(K=as.factor(1:K), signal=factor(data_list$tau != 0 ))) %>%
+ggplot() + geom_histogram(aes(beta, fill=signal)) +
+facet_wrap(~K, scales="free")
+
+stan_results %>% spread_draws(beta[K], r2) %>%
+mutate(K = as.factor(K)) %>%
+left_join(tibble(K=as.factor(1:K), naive=(data_list$tau + data_list$bias))) %>%
+ggplot() + geom_histogram(aes(beta, fill=naive)) +
+facet_wrap(~K, scales="free")
+
+
+stan_results %>% spread_draws(beta[K], r2) %>%
+mutate(K = as.factor(K)) %>%
+left_join(tibble(K=as.factor(1:K), signal=abs(data_list$tau))) %>%
+ggplot() + geom_histogram(aes(beta, fill=signal)) + theme_bw() +
   facet_wrap(~K, scales="free")
 
 stan_results %>% spread_draws(beta[K], r2) %>%
@@ -77,7 +102,6 @@ stan_results %>% spread_draws(beta[K]) %>%
   mutate(K=as.factor(K)) %>% median_qi(beta)
 
 stan_results %>% spread_draws(beta[K], r2) %>%
-  filter(r2 > 0.8) %>%
   mutate(K=as.factor(K)) %>% median_qi(beta)
 
 stan_results %>% spread_draws(gamma[M], r2) %>%
